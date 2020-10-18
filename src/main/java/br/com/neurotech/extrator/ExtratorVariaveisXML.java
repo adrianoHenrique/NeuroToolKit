@@ -29,54 +29,40 @@ public class ExtratorVariaveisXML {
 		xml = lines.collect(Collectors.joining(System.lineSeparator()));
 		lines.close();
 
-		List<String[]> listaCsv = new ArrayList<String[]>();
-		for (String tipo : new String[] { "PROP", "VI", "FLUXO", "FUNCTION", "DB", "GATEWAY", "REGRA", "RET", "FLAG",
-				"CALC" }) {
-			listaCsv.add(getRegistros(xml, tipo));
-		}
-
 		Writer writer = Files.newBufferedWriter(Paths.get("C:\\Users\\User\\Desktop\\relatorio.csv"));
 		CSVWriter csv = new CSVWriter(writer, ';', '"', '"', "\n");
 		csv.writeNext(new String[] { "Tipo", "Quantidade", "Variaveis" });
-		csv.writeAll(listaCsv);
+		csv.writeAll(getRegistros(xml));
 		csv.close();
 		writer.close();
 
 	}
 
-	public static String[] getRegistros(String xml, String tipo) {
-		Elements elements = null;
+	public static List<String[]> getRegistros(String xml) {
+		List<String[]> listaCSV = new ArrayList<String[]>();
+		String[] prefixos = { "PROP_", "VI_", "FLX_","RGR", "RET", "FLAG", "CALC" };
 
-		if (tipo.equals("PROP")) {
-			elements = Jsoup.parse(xml).getElementsByTag("Input");
-		} else if (tipo.equals("VI")) {
-			elements = Jsoup.parse(xml).getElementsByTag("Parameters").first().getElementsByAttributeValueStarting("name", "VI_");
-		} else if (tipo.equals("FLUXO")) {
-			elements = Jsoup.parse(xml).getElementsByAttributeValue("path", "/FLOWS").first()
-					.getElementsByTag("DRObject");
-		} else if (tipo.equals("FUNCTION")) {
-			elements = Jsoup.parse(xml).getElementsByTag("Function");
-		} else if (tipo.equals("DB")) {
-			elements = Jsoup.parse(xml).getElementsByTag("DB");
-		} else if (tipo.equals("GATEWAY")) {
-			elements = Jsoup.parse(xml).getElementsByTag("Gateway");
-		} else if (tipo.equals("REGRA")) {
-			elements = Jsoup.parse(xml).getElementsByAttributeValueStarting("name", "RGR_");
-		} else if (tipo.equals("RET")) {
-			elements = Jsoup.parse(xml).getElementsByAttributeValueStarting("name", "RET_");
-		} else if (tipo.equals("FLAG")) {
-			elements = Jsoup.parse(xml).getElementsByAttributeValueStarting("name", "FLAG_");
-		} else if (tipo.equals("CALC")) {
-			elements = Jsoup.parse(xml).getElementsByAttributeValueStarting("name", "CALC_");
+		for (String prefixo : prefixos) {
+			Elements elements = Jsoup.parse(xml).getElementsByAttributeValueStarting("name", prefixo);
+			String variaveis = "";
+			List<String> listaVar = new ArrayList<String>();
+			for (Element x : elements) {
+				String validacao = x.attr("name");
+				if (!listaVar.contains(validacao)) {
+					listaVar.add(validacao);
+					variaveis += x.attr("name") + "#@#";
+				}
+			}
+			if(variaveis.substring(variaveis.length() - 3, variaveis.length()).equals("#@#")) {
+				variaveis = variaveis.substring(0, variaveis.length() - 3);
+			}
+
+			String qtd = String.valueOf(variaveis.split("#@#").length);
+
+			listaCSV.add(new String[] { prefixo, qtd, variaveis });
 		}
 
-		String qtd = String.valueOf(elements.size());
-		String variaveis = "";
-		for (Element x : elements) {
-			variaveis += x.attr("name") + "#@#";
-		}
-		variaveis = variaveis.substring(0, variaveis.length() - 3);
-		return new String[] { tipo, qtd, variaveis };
+		return listaCSV;
 	}
 
 }
