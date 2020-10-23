@@ -40,12 +40,13 @@ public class ExtratorVariaveisXML {
 
 	public static List<String[]> getRegistros(String xml) {
 		List<String[]> listaCSV = new ArrayList<String[]>();
-		String[] prefixos = { "PROP_", "VI_", "FLX_","RGR", "RET", "FLAG", "CALC" };
+		String[] prefixos = { "PROP_", "VI_", "FLX_","RGR_", "CALC_", "RET_", "FLAG_" };
 
 		for (String prefixo : prefixos) {
 			Elements elements = Jsoup.parse(xml).getElementsByAttributeValueStarting("name", prefixo);
 			String variaveis = "";
 			List<String> listaVar = new ArrayList<String>();
+			
 			for (Element x : elements) {
 				String validacao = x.attr("name");
 				if (!listaVar.contains(validacao)) {
@@ -53,13 +54,14 @@ public class ExtratorVariaveisXML {
 					variaveis += x.attr("name") + "#@#";
 				}
 			}
-			if(variaveis.substring(variaveis.length() - 3, variaveis.length()).equals("#@#")) {
+			if(!variaveis.isEmpty()) {
 				variaveis = variaveis.substring(0, variaveis.length() - 3);
+			
+				String qtd = String.valueOf(variaveis.split("#@#").length);
+
+				listaCSV.add(new String[] { prefixo.replace("_", ""), qtd, variaveis });
 			}
-
-			String qtd = String.valueOf(variaveis.split("#@#").length);
-
-			listaCSV.add(new String[] { prefixo, qtd, variaveis });
+			
 		}
 
 		return listaCSV;
