@@ -8,10 +8,10 @@ import javax.xml.transform.TransformerException;
 import org.apache.http.client.ClientProtocolException;
 import org.xml.sax.SAXException;
 
-import br.com.neurotech.xsl.builder.TesteXtream;
 import br.com.neurotech.xsl.gtw.GateawayBuilderSchemaRequest;
 
 public class TestGtwReturn {
+	@SuppressWarnings("unused")
 	public static void main(String[] args)
 			throws ClientProtocolException, IOException, ParserConfigurationException, SAXException, TransformerException {
 		GateawayBuilderSchemaRequest gtw = new GateawayBuilderSchemaRequest();
@@ -23,7 +23,6 @@ public class TestGtwReturn {
 
 		String gtwBuilderSchema = gtw.getOutputs();
 		
-		TesteXtream.transform(gtwBuilderSchema);
 		
 		//OutputBuilder output = XslConstructor.generateXsl(gtwBuilderSchema);
 
